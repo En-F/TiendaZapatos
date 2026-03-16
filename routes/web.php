@@ -23,6 +23,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/carrito/vaciar',[CarritoController::class, 'vaciar'])->name('carritos.vaciar');
 
+    Route::post('/pedido',[CarritoController::class, 'pedido'])->name('carritos.pedido');
+
     Route::get('/carritos/meter/{id}',[CarritoController::class, 'meter'])->name('carritos.meter');
     Route::post('/logout', function (Request $request) {
         Auth::logout();

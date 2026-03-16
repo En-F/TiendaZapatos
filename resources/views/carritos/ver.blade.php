@@ -53,7 +53,12 @@
     @csrf
             <button class="btn btn-soft btn-error">Vaciar Carrito</button>
     </form>
+    
     <div class="flex-2 mt-8">
+        <form action="{{ route('carritos.pedido')}}" method="POST">
+            @csrf
+            <button class="btn btn-soft btn-success">Realizar Pedido</button>
+        </form>
     <a href="{{route('zapatos.index')}}" class="btn btn-soft btn-info">Volver</a>
     </div>
 </x-app-layout>

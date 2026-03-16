@@ -6,6 +6,7 @@ use App\Models\Carrito;
 use App\Models\Zapato;
 use Illuminate\Cache\RetrievesMultipleKeys;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class CarritoController extends Controller
@@ -91,6 +92,7 @@ class CarritoController extends Controller
         
         if ($existe){
             DB::table('carritos')
+            ->where('usuario_id', $id_usuario)
             ->where('zapato_id','=',$zapato)
             ->update(['cantidad' => DB::raw('cantidad + 1')]);
         } else {
@@ -116,11 +118,13 @@ class CarritoController extends Controller
 
         if ($opcion === 'sumar'){
             DB::table('carritos')
+            ->where('usuario_id', $id_usuario)
             ->where('zapato_id','=',$zapato)
             ->update(['cantidad' => DB::raw('cantidad + 1')]);
         } elseif($opcion === 'restar') {
             if($existe->cantidad > 1){
                 DB::table('carritos')
+                ->where('usuario_id', $id_usuario)
                 ->where('zapato_id','=',$zapato)
                 ->update(['cantidad' => DB::raw('cantidad - 1')]);
             } 
@@ -136,6 +140,34 @@ class CarritoController extends Controller
         DB::table('carritos')->where('usuario_id', '=',$id_usuario)->delete();
         
         return redirect()->route('zapatos.index');
+    }
+
+    public function pedido(Request $request){
+
+        $id_usuario = auth()->id();
+
+        $factura_id =DB::table('facturas')->insertGetId(
+            ['usuario_id'=>$id_usuario,
+            'created_at'=>Carbon::now()]
+        );
+
+        $linea = DB::table('carritos')
+        ->where('usuario_id','=',$id_usuario)
+        ->get();
+
+        $datosParaLineas = [];
+        foreach($linea as $item){
+            $datosParaLineas[] = [
+                'factura_id' => $factura_id, 
+                'zapato_id'  => $item->zapato_id,
+                'cantidad'   => $item->cantidad,
+            ];
+        }
+        DB::table('lineas')->insert($datosParaLineas);
+
+        DB::table('carritos')->where('usuario_id', '=',$id_usuario)->delete();
+
+        return redirect()->route('carritos.ver');
     }
     
 }
